@@ -7,11 +7,12 @@ then pixelizes it using the whole pandemonium of characters from masks.py
 (unless --rect is used, which has pure 1/4 and 1/6 rectangles)
 use --wide for the image to use all columns (preserving aspect), other
 "options" are treated as search keywords.
+--inv (color inversion) added for completeness
 """
 
 import os, sys
 import numpy
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 from masks import *
 
 # FULL char/mask set
@@ -43,7 +44,7 @@ def choose_shape( block ):
     ansi_color = f"\033[38;2;{r1};{g1};{b1}m" + f"\033[48;2;{r2};{g2};{b2}m"
     return f"{ansi_color}{CHARS[I]}"
 
-def display(image_stream, term_width, term_height, scale_mode=None):
+def display(image_stream, term_width, term_height, invQ, scale_mode=None):
     image = Image.open(image_stream)
     if image.mode != 'RGB': # '1' for 0/1, 'L' for greyscale
         image = image.convert('RGB')
@@ -66,6 +67,8 @@ def display(image_stream, term_width, term_height, scale_mode=None):
     width = width if width%3==0 else width+3-(width%3)
     height = height if height%4==0 else height+4-(height%4)
     image = image.resize( (width,height) )
+    if invQ:
+        image = ImageOps.invert(image)
 
     width = width if width%6==0 else width+6-(width%6)
     height = height if height%12==0 else height+12-(height%12)
@@ -106,12 +109,15 @@ def obtain(quer):
     exit(1)
 
 def parse_opts(opts):
-    o = {'scale': None, 'query': 'frog'}
+    o = {'scale': None, 'query': 'frog', 'inv': False}
     keywords = []
     i = 0
     while i < len(opts):
         if opts[i] == '--wide':
             o['scale'] = 'x'
+            i += 1
+        elif opts[i] == '--inv':
+            o['inv'] = True
             i += 1
         elif opts[i] == '--web':
             o['web'] = opts[i+1]
@@ -141,7 +147,7 @@ def main(opts=[]):
     print("Terminal size", eff_width, eff_height)
 
     if 'file' in opt:
-        display( opt['file'], eff_width, eff_height, opt['scale'] )
+        display( opt['file'], eff_width, eff_height, opt['inv'], opt['scale'] )
         exit(0)
     
     try:
@@ -156,7 +162,7 @@ def main(opts=[]):
         if response.status_code!=200:
             print(image_url,"Couldn't fetch image - please try again!", sep='\n')
             exit(1)
-        display( BytesIO(response.content), eff_width, eff_height, opt['scale'] )
+        display( BytesIO(response.content), eff_width, eff_height, opt['inv'], opt['scale'] )
     except Exception as e:
         print(type(e).__name__, '\n', e)
         print(image_url)

@@ -4,11 +4,12 @@
 supplied as commandline arguments), or reads a file with --file option,
 or gets it from the internet with --web option,
 and pixelizes its black and white (grayscale) version using 🬀 etc.
+---inv (color inversion) added for completeness
 """
 
 import os, sys
 import numpy
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 from masks import *
 
 # Only 1/4 and 1/6 rectangle chars/masks
@@ -41,7 +42,7 @@ def choose_shape( block ):
     ansi_color = f"\033[38;2;{r1};{g1};{b1}m" + f"\033[48;2;{r2};{g2};{b2}m"
     return f"{ansi_color}{CHARS[I]}"
 
-def display(image_stream, term_width, term_height, wideQ):
+def display(image_stream, term_width, term_height, wideQ, invQ):
     image = Image.open(image_stream)
     image = image.convert("L") # '1' for 0/1, 'L' for greyscale
     width, height = image.size
@@ -66,6 +67,8 @@ def display(image_stream, term_width, term_height, wideQ):
     width = width if width%3==0 else width+3-(width%3)
     height = height if height%4==0 else height+4-(height%4)
     image = image.resize( (width,height) )
+    if invQ:
+        image = ImageOps.invert(image)
 
     height = height if height%12==0 else height+12-(height%12)
     width = width if width%6==0 else width+6-(width%6)
@@ -114,11 +117,12 @@ def main(opt=[]):
     #print("Terminal size", eff_width, eff_height)
 
     wideQ = True if '--wide' in opt else False
-    opt = [o for o in opt if o != '--wide' ]
+    invQ = True if '--inv' in opt else False
+    opt = [o for o in opt if o not in ['--wide','--inv'] ]
 
     if len(opt) == 2 and opt[0] == '--file':
         print( opt[1] )
-        display( opt[1], eff_width, eff_height, wideQ )
+        display( opt[1], eff_width, eff_height, wideQ, invQ )
         return
     
     try:
@@ -133,7 +137,7 @@ def main(opt=[]):
         if response.status_code!=200:
             print(image_url,"Couldn't fetch image - please try again!", sep='\n')
             exit(1)
-        display( BytesIO(response.content), eff_width, eff_height, wideQ )
+        display( BytesIO(response.content), eff_width, eff_height, wideQ, invQ )
     except Exception as e:
         print(type(e).__name__, '\n', e)
         print(image_url)

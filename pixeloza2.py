@@ -4,14 +4,15 @@
 supplied as commandline arguments) and pixelizes it using simple half-blocks ▀.
 
 --web, --file, --wide options as in pixeloza1.py
+--inv (color inversion) added for completeness
 """
 
 import os, sys, random, requests
 from io import BytesIO
 from bs4 import BeautifulSoup
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
-def display(image_stream, eff_width, eff_height, wideQ):
+def display(image_stream, eff_width, eff_height, wideQ, invQ):
     image = Image.open(image_stream)
     if image.mode != 'RGB':
         image = image.convert('RGB')
@@ -23,6 +24,8 @@ def display(image_stream, eff_width, eff_height, wideQ):
     scale = x_scale if wideQ else max(x_scale,y_scale)
     width, height = round(width/scale), round(height/scale)
     image = image.resize((width,height))
+    if invQ:
+        image = ImageOps.invert(image)
 
     # Process each block of pixels and display color in terminal
     for y in range(0, height, 2):
@@ -62,10 +65,11 @@ def main(opt=[]):
     eff_height = 2*(terminal_size.lines-1)
     
     wideQ = True if '--wide' in opt else False
-    opt = [o for o in opt if o != '--wide' ]
+    invQ = True if '--inv' in opt else False
+    opt = [o for o in opt if o not in ['--wide', '--inv'] ]
 
     if len(opt) == 2 and opt[0] == '--file':
-        display( opt[1], eff_width, eff_height, wideQ )
+        display( opt[1], eff_width, eff_height, wideQ, invQ )
         return
 
     try:
@@ -78,7 +82,7 @@ def main(opt=[]):
             print(image_url)
             print("Couldn't fetch image - please try again!")
             exit(1)
-        display( BytesIO(response.content), eff_width, eff_height, wideQ )
+        display( BytesIO(response.content), eff_width, eff_height, wideQ, invQ )
     except Exception as e:
         print(type(e).__name__, '\n', e)
         print(image_url)
