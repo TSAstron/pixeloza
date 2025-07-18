@@ -12,8 +12,8 @@ If run without arguments, it will give you frogs. But you can supply any number 
 The available options are:<br>
 `--file PATH` - to show a local file;<br>
 `--web URL` - to show image at that url;<br>
-`--inv` - to invert black/white (for pasting into text files);<br>
 `--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
+`--inv` - to invert black/white (for pasting into text files);<br>
 `--show_full` - to display (as an image with the default viewer) the full resolution dithered picture.<br>
 
 With a tiny font size (like 6) the images are surprisingly good, but that is not working size terminal. The real improvements come with the next modes.
@@ -32,7 +32,8 @@ from the original:<br>
 The available options are:<br>
 `--file PATH` - to show a local file;<br>
 `--web URL` - to show image at that url;<br>
-`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all).<br>
+`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
+`--inv` - to invert colours.<br>
 
 
 ## pixeloza3
@@ -51,7 +52,8 @@ Note, that there is no internal dithering or anti-aliasing applied, although tha
 The available options are:<br>
 `--file PATH` - to show a local file;<br>
 `--web URL` - to show image at that url;<br>
-`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all).<br>
+`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
+`--inv` - to invert colours.<br>
 
 ## pixeloza5.py
 
@@ -65,8 +67,9 @@ from the original:<br>
 The available options are:<br>
 `--file PATH` - to show a local file;<br>
 `--web URL` - to show image at that url;<br>
-`--rect` - to only use tha rectangular masks, i.e. the same characters as pixeloza4.py;<br>
-`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all).<br>
+`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
+`--inv` - to invert colours;<br>
+`--rect` - to only use tha rectangular masks, i.e. the same characters as pixeloza4.py.<br>
 
 The first frog now looks like this:<br>
 <img alt="a colourful frog" src="/images/froszka_ex5_2.jpeg" width=480>.
