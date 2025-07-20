@@ -1,5 +1,6 @@
 # pixeloza
-&nbsp; (or pixelosis) is a series of programs to display images in a text terminal, using increasingly involved characters: from simple rectangular blocks, to triangles and polygons. The basic versions should work in any console/text file, the later ones require more unicode. 
+&nbsp; (or pixelosis) is a series of programs to display images in a text terminal, using increasingly involved characters: from simple rectangular blocks, to triangles and polygons. The basic versions should work in any console/text file, the later ones require more unicode (fonts).
+In any case, **pure text** is used, there is no pixel-level display involved. Check the [Appendix](#appendix) for the necessary python packages.
 
 ## pixeloza1.py
 
@@ -8,13 +9,13 @@ This mode was added retrospectively, so that images can be displayed as true mon
 <img alt="a pixelated frog" src="/images/froszka_ex1_1.jpeg" width=300> &emsp; from the original &emsp;
 <img alt="a colourful frog" src="/images/froszka_ex1_0.jpeg">.
 
-If run without arguments, it will give you frogs. But you can supply any number of keywords to be searched for on the internet.
-The available options are:<br>
+If run without arguments, it will give you frogs. But you can supply any number of keywords to be searched for on the internet, e.g. `python3 pixeloza1.py space elves`. The output can additionally be manipulated with the available options:<br>
 `--file PATH` - to show a local file;<br>
 `--web URL` - to show image at that url;<br>
 `--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
 `--inv` - to invert black/white (for pasting into text files);<br>
-`--show_full` - to display (as an image with the default viewer) the full resolution dithered picture.<br>
+`--show_full` - to display (as an image with the default viewer) the full resolution dithered picture;<br>
+`--help` - to show the options and usage.<br>
 
 With a tiny font size (like 6) the images are surprisingly good, but that is not working size terminal. The real improvements come with the next modes.
 
@@ -33,8 +34,8 @@ The available options are:<br>
 `--file PATH` - to show a local file;<br>
 `--web URL` - to show image at that url;<br>
 `--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
-`--inv` - to invert colours.<br>
-
+`--inv` - to invert colours;<br>
+`--help` - to show the options and usage.<br>
 
 ## pixeloza3
 
@@ -53,7 +54,8 @@ The available options are:<br>
 `--file PATH` - to show a local file;<br>
 `--web URL` - to show image at that url;<br>
 `--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
-`--inv` - to invert colours.<br>
+`--inv` - to invert colours;<br>
+`--help` - to show the options and usage.<br>
 
 ## pixeloza5.py
 
@@ -69,7 +71,8 @@ The available options are:<br>
 `--web URL` - to show image at that url;<br>
 `--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
 `--inv` - to invert colours;<br>
-`--rect` - to only use tha rectangular masks, i.e. the same characters as pixeloza4.py.<br>
+`--rect` - to only use tha rectangular masks, i.e. the same characters as [pixeloza4.py](#pixeloza4py);<br>
+`--help` - to show the options and usage.<br>
 
 The first frog now looks like this:<br>
 <img alt="a colourful frog" src="/images/froszka_ex5_2.jpeg" width=480>.
@@ -77,3 +80,13 @@ The first frog now looks like this:<br>
 ##
 
 See also the [interactive frogs and toads](https://monodromy.group/frogs/).
+<br><br>
+
+## Appendix
+
+Though widely used, some python packages might not be included with your python distribution. Most likely these are:<br>
+`requests`, `numpy`, `bs4` (BeautifulSoup), `Pillow` (PIL).<br>
+Installation depends on the system, but for python3 it is usually some version of:<br>
+`python3 -m pip install package_name` or `pip3 install package_name` (user/environment specific)<br>
+`conda install conda-forge::package_name` (miniconda etc.)<br> 
+`sudo apt install python3-package_name` (system-wide for Ubuntu).
