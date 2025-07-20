@@ -1,14 +1,18 @@
-#!/bin/python3
+#!/usr/bin/python3
 
 """ This is the retro version, which gets a random image (based on keywords
 supplied as commandline arguments) and pixelizes it using simple half-blocks ▀,
-as 1/0 monochrome pixels.
+as 1/0 monochrome pixels."""
 
-usage:
-pixeloza1.py keyword(s)     displays a random image from the net (found by keywords)
+help_text = """
+basic usage:
+[python] pixeloza1.py keyword1 keyword2 ...
+
+    displays a random image from the net, found by keywords
+    (including unrecognized options)
 
 options:
---file PATH     to use local file
+--file PATH     to use a local file (overrides --web)
 --web URL       to use an image from the web
 
 --wide          to use all console/terminal colums
@@ -16,8 +20,9 @@ options:
 --show_full     to also show the image (in default image viewer) dithered in full resolution
 """
 
-import os, sys, random, requests
-import time, numpy
+import os, sys 
+import requests
+import numpy
 from io import BytesIO
 from bs4 import BeautifulSoup
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -130,7 +135,7 @@ def Hybrid(B):
             C[y+2,x+1] += err*1.5
             C[y+2,x+2] += err*0.5
 
-def display(image_stream, eff_width, eff_height, wideQ, invQ, fullQ):
+def display(image_stream, eff_width, eff_height, scale_mode, invQ, fullQ):
     image = Image.open(image_stream)
     width, height = image.size
     # full res dither
@@ -142,7 +147,7 @@ def display(image_stream, eff_width, eff_height, wideQ, invQ, fullQ):
     # Calculate scaling factors to fit the image within the terminal
     x_scale = width / eff_width
     y_scale = height / eff_height
-    scale = x_scale if wideQ else max(x_scale,y_scale)
+    scale = x_scale if scale_mode=='x' else max(x_scale,y_scale)
     width, height = round(width/scale), round(height/scale)
     print(width,height)
     if invQ:
@@ -179,7 +184,7 @@ def obtain(quer):
         "udm": 2,
         "safe": "off",
         "sclient": "img",
-        "start": random.choice([1,10,20,30,40,50]) }
+        "start": numpy.random.choice([1,10,20,30,40,50]) }
 
     response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:
@@ -187,40 +192,70 @@ def obtain(quer):
         img_elements = soup.find_all("img")
         img_urls = [img["src"] for img in img_elements if "src" in img.attrs and not img["src"].startswith('/images/branding')]
         if len(img_urls) > 0:
-            return random.choice( img_urls )
+            return numpy.random.choice( img_urls )
     print("Failed to fetch search results - please try again!")
     exit(1)
 
-def main(opt=[]):
+def parse_opts(opts):
+    o = {'scale': None, 'query': 'frog', 'inv': False, 'full': False}
+    keywords = []
+    i = 0
+    while i < len(opts):
+        if opts[i] == '--wide':
+            o['scale'] = 'x'
+            i += 1
+        elif opts[i] == '--inv':
+            o['inv'] = True
+            i += 1
+        elif opts[i] == '--web':
+            o['web'] = opts[i+1]
+            i += 2
+        elif opts[i] == '--file':
+            o['file'] = opts[i+1]
+            i += 2
+        elif opts[i] == '--show_full':
+            o['full'] = True
+            i += 1
+        else:
+            keywords.append( opts[i] )
+            i += 1
+    if len(keywords) > 0:
+        if any( q.startswith('--') for q in keywords ):
+            print('Suspicious keywords found:', *[repr(k) for k in keywords if k.startswith('--')])
+            print('Were those meant as options? Use --help to list them.')
+        o['query'] = ' '.join(keywords)
+    return o
+def main(opts=[]):
+    if '--help' in opts:
+        print(help_text)
+        return
+
     # Terminal dimensions
     terminal_size = os.get_terminal_size()
     eff_width = terminal_size.columns-1
     eff_height = 2*(terminal_size.lines-1)
     
-    wideQ = True if '--wide' in opt else False
-    invQ = True if '--inv' in opt else False 
-    fullQ = True if '--show_full' in opt else False 
-    opt = [o for o in opt if o not in ['--wide','--inv','--show_full'] ]
+    opt = parse_opts(opts)
 
-    if len(opt) == 2 and opt[0] == '--file':
-        display( opt[1], eff_width, eff_height, wideQ, invQ, fullQ )
+    if 'file' in opt:
+        display( opt['file'], eff_width, eff_height, opt['scale'], opt['inv'], opt['full'] )
         return
 
     try:
-        if len(opt)==2 and opt[0] == "--web":
-            image_url = opt[1]
+        if 'web' in opt:
+            image_url = opt['web']
         else:
-            image_url = obtain( ' '.join(opt) ) if opt else obtain("frog")
+            image_url = obtain( opt['query'] )
         response = requests.get(image_url)
         if response.status_code!=200:
-            print(image_url)
-            print("Couldn't fetch image - please try again!")
-            exit(1)
-        display( BytesIO(response.content), eff_width, eff_height, wideQ, invQ, fullQ)
+            print(image_url, "\nCouldn't fetch image - please try again!")
+            sys.exit(1)
+        display( BytesIO(response.content), eff_width, eff_height, opt['scale'], opt['inv'], opt['full'])
     except Exception as e:
         print(type(e).__name__, '\n', e)
-        print(image_url)
-        print("Unacceptable image or url - please try again!")
+        print(image_url, "\nUnacceptable image or url - please try again!")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main( sys.argv[1:] )
+    sys.exit(0)

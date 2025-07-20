@@ -1,18 +1,31 @@
-#!/bin/python3
+#!/usr/bin/python3
 
 """ This is the main version, which gets a random image (based on keywords
 supplied as commandline arguments) and pixelizes it using simple half-blocks ▀.
-
---web, --file, --wide options as in pixeloza1.py
---inv (color inversion) added for completeness
 """
 
-import os, sys, random, requests
+help_text = """
+basic usage:
+[python] pixeloza2.py keyword1 keyword2 ...
+
+    displays a random image from the net, found by keywords
+    (including unrecognized options)
+
+options:
+--file PATH     to use a local file (overrides --web)
+--web URL       to use an image from the web
+
+--wide          to use all console/terminal colums
+--inv           to invert colors
+"""
+
+import os, sys, random
+import requests
 from io import BytesIO
 from bs4 import BeautifulSoup
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-def display(image_stream, eff_width, eff_height, wideQ, invQ):
+def display(image_stream, eff_width, eff_height, scale_mode, invQ):
     image = Image.open(image_stream)
     if image.mode != 'RGB':
         image = image.convert('RGB')
@@ -21,7 +34,7 @@ def display(image_stream, eff_width, eff_height, wideQ, invQ):
     # Calculate scaling factors to fit the image within the terminal
     x_scale = width / eff_width
     y_scale = height / eff_height
-    scale = x_scale if wideQ else max(x_scale,y_scale)
+    scale = x_scale if scale_mode=='x' else max(x_scale,y_scale)
     width, height = round(width/scale), round(height/scale)
     image = image.resize((width,height))
     if invQ:
@@ -56,37 +69,66 @@ def obtain(quer):
         if len(img_urls) > 0:
             return random.choice( img_urls )
     print("Failed to fetch search results - please try again!")
-    exit(1)
+    sys.exit(1)
 
-def main(opt=[]):
+def parse_opts(opts):
+    o = {'scale': None, 'query': 'frog', 'inv': False}
+    keywords = []
+    i = 0
+    while i < len(opts):
+        if opts[i] == '--wide':
+            o['scale'] = 'x'
+            i += 1
+        elif opts[i] == '--inv':
+            o['inv'] = True
+            i += 1
+        elif opts[i] == '--web':
+            o['web'] = opts[i+1]
+            i += 2
+        elif opts[i] == '--file':
+            o['file'] = opts[i+1]
+            i += 2
+        else:
+            keywords.append( opts[i] )
+            i += 1
+    if len(keywords) > 0:
+        if any( q.startswith('--') for q in keywords ):
+            print('Suspicious keywords found:', *[repr(k) for k in keywords if k.startswith('--')])
+            print('Were those meant as options? Use --help to list them.')
+        o['query'] = ' '.join(keywords)
+    return o
+
+def main(opts=[]):
+    if '--help' in opts:
+        print(help_text)
+        return
+
     # Terminal dimensions
     terminal_size = os.get_terminal_size()
     eff_width = terminal_size.columns-1
     eff_height = 2*(terminal_size.lines-1)
     
-    wideQ = True if '--wide' in opt else False
-    invQ = True if '--inv' in opt else False
-    opt = [o for o in opt if o not in ['--wide', '--inv'] ]
+    opt = parse_opts(opts)
 
-    if len(opt) == 2 and opt[0] == '--file':
-        display( opt[1], eff_width, eff_height, wideQ, invQ )
+    if 'file' in opt:
+        display( opt['file'], eff_width, eff_height, opt['scale'], opt['inv'] )
         return
 
     try:
-        if len(opt)==2 and opt[0] == "--web":
-            image_url = opt[1]
+        if 'web' in opt:
+            image_url = opt['web']
         else:
-            image_url = obtain( ' '.join(opt) ) if opt else obtain("frog")
+            image_url = obtain( opt['query'] )
         response = requests.get(image_url)
         if response.status_code!=200:
-            print(image_url)
-            print("Couldn't fetch image - please try again!")
-            exit(1)
-        display( BytesIO(response.content), eff_width, eff_height, wideQ, invQ )
+            print(image_url, "Couldn't fetch image - please try again!", sep='\n')
+            sys.exit(1)
+        display( BytesIO(response.content), eff_width, eff_height, opt['scale'], opt['inv'] )
     except Exception as e:
         print(type(e).__name__, '\n', e)
-        print(image_url)
-        print("Unacceptable image or url - please try again!")
+        print(image_url, "\nUnacceptable image or url - please try again!")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main( sys.argv[1:] )
+    sys.exit(0)

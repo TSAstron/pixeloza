@@ -1,13 +1,24 @@
 #!/usr/bin/python3
 
-""" This has 3*2 sub-blocks. It gets a random image (based on keywords
-supplied as commandline arguments), or reads a file with --file option,
-or gets it from the internet with --web option,
+""" This has 3*2 sub-blocks, further subdivided into 12x6.
+It gets a random image (based on keywords supplied as commandline arguments)
 then pixelizes it using the whole pandemonium of characters from masks.py
 (unless --rect is used, which has pure 1/4 and 1/6 rectangles)
-use --wide for the image to use all columns (preserving aspect), other
-"options" are treated as search keywords.
---inv (color inversion) added for completeness
+"""
+help_text = """
+basic usage:
+[python] pixeloza5.py keyword1 keyword2 ...
+
+    displays a random image from the net, found by keywords
+    (including unrecognized options)
+
+options:
+--file PATH     to use a local file (overrides --web)
+--web URL       to use an image from the web
+
+--wide          to use all console/terminal colums
+--inv           to invert black/white (console/txt file visibility)
+--rect          to only use rectangular pixels (🬗, ▚) as in pixeloza4
 """
 
 import os, sys
@@ -84,14 +95,13 @@ def display(image_stream, term_width, term_height, invQ, scale_mode=None):
         print(msg+"\033[0m")  # Reset colors and Move to the next row
 
 def obtain(quer):
-    import random
-    eng = random.choice(["goo","bin"])
+    eng = numpy.random.choice(["goo","bin"])
     if eng == 'bin':
         url = "https://bing.com/images/search"
-        params = { "q": quer, "safesearch": "off", "first": random.choice([1,10,20,30,40,50]) }
+        params = { "q": quer, "safesearch": "off", "first": numpy.random.choice([1,10,20,30,40,50]) }
     else:
         url = "https://www.google.com/search"
-        params = { "q": quer, "udm": 2, "safe": "off", "start": random.choice([1,10,20,30,40,50]) }
+        params = { "q": quer, "udm": 2, "safe": "off", "start": numpy.random.choice([1,10,20,30,40,50]) }
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
 
     response = requests.get(url, headers=headers, params=params)
@@ -104,9 +114,9 @@ def obtain(quer):
         else:
             img_urls = [img["src"] for img in img_elements if "src" in img.attrs and not img['src'].startswith('/images/branding')]
         if len(img_urls) > 0:
-            return random.choice( img_urls )
+            return numpy.random.choice( img_urls )
     print("Failed to fetch search results - please try again!")
-    exit(1)
+    sys.exit(1)
 
 def parse_opts(opts):
     o = {'scale': None, 'query': 'frog', 'inv': False}
@@ -134,10 +144,16 @@ def parse_opts(opts):
             keywords.append( opts[i] )
             i += 1
     if len(keywords) > 0:
+        if any( q.startswith('--') for q in keywords ):
+            print('Suspicious keywords found:', *[repr(k) for k in keywords if k.startswith('--')])
+            print('Were those meant as options? Use --help to list them.')
         o['query'] = ' '.join(keywords)
     return o
 
 def main(opts=[]):
+    if '--help' in opts:
+        print(help_text)
+        sys.exit(0)
     opt = parse_opts(opts)
 
     # Terminal dimensions
@@ -148,7 +164,7 @@ def main(opts=[]):
 
     if 'file' in opt:
         display( opt['file'], eff_width, eff_height, opt['inv'], opt['scale'] )
-        exit(0)
+        sys.exit(0)
     
     try:
         global requests
@@ -163,6 +179,7 @@ def main(opts=[]):
             print(image_url,"Couldn't fetch image - please try again!", sep='\n')
             exit(1)
         display( BytesIO(response.content), eff_width, eff_height, opt['inv'], opt['scale'] )
+        sys.exit(0)
     except Exception as e:
         print(type(e).__name__, '\n', e)
         print(image_url)
