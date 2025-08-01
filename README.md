@@ -85,7 +85,7 @@ See also the [interactive frogs and toads](https://monodromy.group/frogs/).
 ## Appendix
 
 Though widely used, some python packages might not be included with your python distribution. Most likely these are:<br>
-`requests`, `numpy`, `bs4` (BeautifulSoup), `Pillow` (PIL).<br>
+`requests`, `numpy`, `bs4` (BeautifulSoup), `Pillow` (PIL). The `numba` package is not necessary, but speeds up the computation considerably.<br>
 Installation depends on the system, but for python3 it is usually some version of:<br>
 `python3 -m pip install package_name` or `pip3 install package_name` (user/environment specific)<br>
 `conda install conda-forge::package_name` (miniconda etc.)<br> 
