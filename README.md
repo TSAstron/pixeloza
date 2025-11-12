@@ -17,7 +17,8 @@ If run without arguments, it will give you frogs. But you can supply any number 
 `--show_full` - to display (as an image with the default viewer) the full resolution dithered picture;<br>
 `--help` - to show the options and usage.<br>
 
-With a tiny font size (like 6) the images are surprisingly good, but that is not working size terminal. The real improvements come with the next modes.
+With a tiny font size (like 6) the images are surprisingly good, but that is not working size terminal. The real improvements come with the next modes.<br>
+For an image-to-image dithering, with various algorithms, check out the [JavaScript implementation on my homepage](https://monodromy.group/dither/).
 
 ## pixeloza2.py
 
@@ -79,7 +80,7 @@ The first frog now looks like this:<br>
 
 ##
 
-See also the [interactive frogs and toads](https://monodromy.group/frogs/).
+See also the [interactive frogs and toads](https://monodromy.group/frogs/) and [the image ditherer](https://monodromy.group/dither/).
 <br><br>
 
 ## Appendix
