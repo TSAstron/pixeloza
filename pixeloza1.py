@@ -27,16 +27,6 @@ from io import BytesIO
 from bs4 import BeautifulSoup
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-try:
-    from numba import njit
-except ImportError:
-    print("Couldn't import numba, proceeding without JIT")
-    def njit(*args, **kwargs):
-        if type(args[0]).__name__ == 'function':
-            return args[0]
-        else:
-            return lambda q: q
-@njit
 def Atkinson(B):
     C = numpy.zeros((B.shape[0]+2,B.shape[1]+2), dtype=float)
     C[:-2,:-2] = B
@@ -53,7 +43,6 @@ def Atkinson(B):
             C[y+1,x] += err
             C[y+1,x+1] += err
             C[y+2,x] += (1-q)*err
-@njit
 def AtkinsonRand(B):
     # randomly nudge the weights of the furthest pixels - helps prevent
     # artifact lines
@@ -73,7 +62,6 @@ def AtkinsonRand(B):
             C[y+1,x] += err
             C[y+1,x+1] += err
             C[y+2,x] += (1-q)*err
-@njit
 def FloydSteinberg(B):
     C = numpy.zeros((B.shape[0]+2,B.shape[1]+2), dtype=float)
     C[:-2,:-2] = B
@@ -87,7 +75,6 @@ def FloydSteinberg(B):
             C[y+1,x-1] += err*3
             C[y+1,x] += err*5
             C[y+1,x+1] += err*1
-@njit
 def JarvisJudisNinke(B):
     C = numpy.zeros((B.shape[0]+2,B.shape[1]+2), dtype=float)
     C[:-2,:-2] = B
@@ -109,7 +96,6 @@ def JarvisJudisNinke(B):
             C[y+2,x] += err*5
             C[y+2,x+1] += err*3
             C[y+2,x+2] += err
-@njit
 def FSAtkinson(B):
     # Mixed Atkinson + Floyd-Steinberg
     C = numpy.zeros((B.shape[0]+2,B.shape[1]+2), dtype=float)
@@ -126,25 +112,6 @@ def FSAtkinson(B):
             C[y+1,x] += 0.21875*err #  5/16 + 1/8 -> 7/32
             C[y+1,x+1] += 0.09375*err #  1/16 + 1/8 -> 3/32
             C[y+2,x] += 0.0625*err #  0 + 1/8 -> 1/16
-@njit
-def FSAtkinsonRand(B):
-    # FS + AtkinsonRand
-    C = numpy.zeros((B.shape[0]+2,B.shape[1]+2), dtype=float)
-    C[:-2,:-2] = B
-    for y in range(B.shape[0]):
-        for x in range(B.shape[1]):
-            if C[y,x] >= 128:
-                err, B[y,x] = C[y,x]-255, 255
-            else:
-                err, B[y,x] = C[y,x], 0
-            q = (numpy.random.randint(3)-1)
-            C[y,x+1] += 0.28125*err        # 7/16 + 1/8 -> 9/32
-            C[y,x+2] += 0.0625*(1+q)*err   # 0 + (1+q)/8 -> (1+q)/16
-            C[y+1,x-1] += 0.15625*err      # 3/16 + 1/8 -> 5/32
-            C[y+1,x] += 0.21875*err        #  5/16 + 1/8 -> 7/32
-            C[y+1,x+1] += 0.09375*err      #  1/16 + 1/8 -> 3/32
-            C[y+2,x] += 0.0625*(1-q)*err   #  0 + (1-q)/8 -> (1-q)/16
-@njit
 def Hybrid(B):
     # Atkinson mixed with JJN
     C = numpy.zeros((B.shape[0]+2,B.shape[1]+2), dtype=float)
@@ -175,7 +142,7 @@ def display(image_stream, eff_width, eff_height, scale_mode, invQ, fullQ):
     if fullQ:
         Bx = numpy.array(image.convert('L'))
         FSAtkinson(Bx)
-        #AtkinsonRand(Bx)
+        AtkinsonRand(Bx)
         Image.fromarray(Bx).show()
     # Calculate scaling factors to fit the image within the terminal
     x_scale = width / eff_width
@@ -248,6 +215,9 @@ def parse_opts(opts):
             i += 2
         elif opts[i] == '--show_full':
             o['full'] = True
+            i += 1
+        elif opts[i] == '--rect':
+            print('--rect does nothing in dithering and will be ignored')
             i += 1
         else:
             keywords.append( opts[i] )
