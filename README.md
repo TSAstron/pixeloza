@@ -90,7 +90,31 @@ The first frog now looks like this:<br>
 
 ## pixeloza8.py
 
-8-bit version 𜵘 coming soon.
+The "version" number really signifies the 8-bit of blocks like 𜵘 - all possible 2x4 square configurations available at our disposal.
+Although these can be found in the Symbols for Legacy Computing Supplement Unicode block,
+and various fonts (like Cascadia) have them, they display inconsistently across systems and terminals.
+Plus, inconveniently, the characters are not ordered properly: lacking those blocks that can be found elsewhere.
+
+There are 256 characters required, and it would be nice if they were accessible with Python's simple `chr`.
+So, I made my own pixel fonts, included here, that occupy the Private Usa Are starting at U+EE00.
+BinaryDejaVu4x2.ttf has the required blocks inserted into the DejaVu Sans Mono font,
+while RandomYxZ.bdf are linux bitmap fonts of various sizes.
+The former works everywhere, but might display with the artifacts mentioned in [pixeloza3](#pixeloza3py),
+the latter works ideally under linux, specifically in the good old xterm via<br>
+`xterm -fn "-*-Random8x16*"`
+
+With a 16-pixel font on a 4K screen, the effect is like a normal dithered image,
+although such a terminal is probably not very readable for actual text.<br>
+<img alt="a dithered frog" src="/images/froszka_ex1_8.jpeg" width=480>
+<img alt="a dithered crab" src="/images/froszka_ex5_8.jpeg" width=480>
+
+The available options are the same as for pixeloza3:<br>
+`--file PATH` - to show a local file;<br>
+`--web URL` - to show image at that url;<br>
+`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
+`--inv` - to invert black/white (for pasting into text files);<br>
+`--show_full` - to display (as an image with the default viewer) the full resolution dithered picture;<br>
+`--help` - to show the options and usage.<br>
 
 ##
 
