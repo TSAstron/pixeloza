@@ -38,9 +38,19 @@ The available options are:<br>
 `--inv` - to invert colours;<br>
 `--help` - to show the options and usage.<br>
 
-## pixeloza3
+## pixeloza3.py
 
-There is no pixeloza3.
+An improvement on pixeloza1, utilizing 1/6 blocks (like 🬗). This will require a font that covers the unicode range of U+1FB00 -- U+1FB3B, but standard fonts like Ubuntu Mono, DejaVu Sans Mono, Cascadia Mono or Noto Mono work. The displayed blocks are no longer squares, but the algorithm takes that into account, achieving a somewhat better resolution. However, this is where the OS and the specific terminal you use will start interfering visibly: various hinting and aliasing rules might lead to the blocks being separate by empty lines (for some font sizes), leading to a sliced image. Not much can be done about it, other than creating custom fonts for specific terminals - like in [pixeloza8](#pixeloza8py).<br>
+Here's our frog model again, looking even better:<br>
+<img alt="a pixelized frog" src="/images/froszka_ex1_3.jpeg" width=360>
+
+The available options are the same as for pixeloza1:<br>
+`--file PATH` - to show a local file;<br>
+`--web URL` - to show image at that url;<br>
+`--wide` - to make the image use all available terminal columns (so you need ot scroll to see it all);<br>
+`--inv` - to invert black/white (for pasting into text files);<br>
+`--show_full` - to display (as an image with the default viewer) the full resolution dithered picture;<br>
+`--help` - to show the options and usage.<br>
 
 ## pixeloza4.py
 
@@ -77,6 +87,10 @@ The available options are:<br>
 
 The first frog now looks like this:<br>
 <img alt="a colourful frog" src="/images/froszka_ex5_2.jpeg" width=480>.
+
+## pixeloza8.py
+
+8-bit version 𜵘 coming soon.
 
 ##
 
